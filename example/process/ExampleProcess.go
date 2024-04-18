@@ -6,7 +6,7 @@ import (
 	"log"
 )
 
-//这里定义一个示例流程，而后将流程定义转为Json
+// 这里定义一个示例流程，而后将流程定义转为Json
 func CreateProcessJson() (string, error) {
 
 	//初始节点
@@ -31,7 +31,7 @@ func CreateProcessJson() (string, error) {
 	//在这个节点中，使用了MyEvent_ResolveRoles做角色解析,MyEvent_Notify做通知
 	Node3 := Node{NodeID: "Manager", NodeName: "主管审批",
 		NodeType: 1, Roles: []string{"主管"},
-		PrevNodeIDs: []string{"GW-Day"},
+		PrevNodeIDs:     []string{"GW-Day"},
 		NodeStartEvents: []string{"MyEvent_ResolveRoles", "MyEvent_Notify"},
 		NodeEndEvents:   []string{"MyEvent_End"},
 	}
@@ -46,7 +46,7 @@ func CreateProcessJson() (string, error) {
 	//人事审批任务节点，同样使用MyEvent_ResolveRoles做角色解析,MyEvent_Notify做通知
 	Node5 := Node{NodeID: "HR", NodeName: "人事审批",
 		NodeType: 1, Roles: []string{"人事经理"},
-		PrevNodeIDs: []string{"GW-Parallel"},
+		PrevNodeIDs:     []string{"GW-Parallel"},
 		NodeStartEvents: []string{"MyEvent_ResolveRoles", "MyEvent_Notify"},
 		NodeEndEvents:   []string{"MyEvent_End"},
 	}
@@ -56,10 +56,10 @@ func CreateProcessJson() (string, error) {
 	//另外，这里使用了Task结束事件，请务必查看一下该事件逻辑
 	Node6 := Node{NodeID: "DeputyBoss", NodeName: "副总审批",
 		NodeType: 1, Roles: []string{"副总"},
-		IsCosigned:  1,
-		PrevNodeIDs: []string{"GW-Parallel"},
-		NodeStartEvents: []string{"MyEvent_ResolveRoles", "MyEvent_Notify"},
-		NodeEndEvents:   []string{"MyEvent_End"},
+		IsCosigned:       1,
+		PrevNodeIDs:      []string{"GW-Parallel"},
+		NodeStartEvents:  []string{"MyEvent_ResolveRoles", "MyEvent_Notify"},
+		NodeEndEvents:    []string{"MyEvent_End"},
 		TaskFinishEvents: []string{"MyEvent_TaskForceNodePass"},
 	}
 
@@ -76,7 +76,7 @@ func CreateProcessJson() (string, error) {
 	//这是一个非会签节点：一人通过即通过，一人驳回即驳回
 	Node8 := Node{NodeID: "Boss", NodeName: "老板审批",
 		NodeType: 1, Roles: []string{"老板"},
-		PrevNodeIDs: []string{"GW-Parallel2"},
+		PrevNodeIDs:     []string{"GW-Parallel2"},
 		NodeStartEvents: []string{"MyEvent_ResolveRoles", "MyEvent_Notify"},
 		NodeEndEvents:   []string{"MyEvent_End"},
 	}
@@ -98,7 +98,7 @@ func CreateProcessJson() (string, error) {
 	Nodelist = append(Nodelist, Node8)
 	Nodelist = append(Nodelist, Node9)
 
-	process:=Process{ProcessName: "员工请假",Source: "办公系统",RevokeEvents: []string{"MyEvent_Revoke"},Nodes: Nodelist}
+	process := Process{ProcessName: "员工请假", Source: "办公系统", RevokeEvents: []string{"MyEvent_Revoke"}, Nodes: Nodelist}
 
 	//转化为json
 	j, err := JSONMarshal(process, false)
@@ -106,7 +106,7 @@ func CreateProcessJson() (string, error) {
 	return string(j), err
 }
 
-func CreateExampleProcess(){
+func CreateExampleProcess() {
 	//获得示例流程json
 	j, err := CreateProcessJson()
 	if err != nil {
@@ -114,7 +114,7 @@ func CreateExampleProcess(){
 	}
 
 	//保存流程
-	id, err := ProcessSave(j,"system")
+	id, err := ProcessSave(j, "system")
 	if err != nil {
 		log.Fatal(err)
 	}

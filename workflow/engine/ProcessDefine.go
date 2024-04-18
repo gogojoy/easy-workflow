@@ -7,7 +7,7 @@ import (
 	"gorm.io/gorm"
 )
 
-//流程定义解析(json->struct)
+// 流程定义解析(json->struct)
 func ProcessParse(Resource string) (Process, error) {
 	var process Process
 	err := Json2Struct(Resource, &process)
@@ -19,7 +19,7 @@ func ProcessParse(Resource string) (Process, error) {
 
 //todo:这里要写一个func，检查解析后的node结构，比如是否只有一个开始和结束节点
 
-//流程定义保存,返回 流程ID、error
+// 流程定义保存,返回 流程ID、error
 func ProcessSave(Resource string, CreateUserID string) (int, error) {
 	//解析传入的json，获得process数据结构
 	process, err := ProcessParse(Resource)
@@ -42,8 +42,8 @@ func ProcessSave(Resource string, CreateUserID string) (int, error) {
 	//判断工作流是否已经定义
 	if ProcID != 0 { //已有老版本
 		//需要将老版本移到历史表中
-		result := tx.Exec("INSERT INTO hist_proc_def(proc_id,NAME,`version`,resource,user_id,source,create_time)\n        "+
-			"SELECT id,NAME,`version`,resource,user_id,source,create_time\n"+
+		result := tx.Exec("INSERT INTO hist_proc_def(proc_id,NAME,version,resource,user_id,source,create_time)\n        "+
+			"SELECT id,NAME,version,resource,user_id,source,create_time\n"+
 			"FROM proc_def WHERE NAME=? AND source=?;", process.ProcessName, process.Source)
 		if result.Error != nil {
 			tx.Rollback()
@@ -109,7 +109,7 @@ func ProcessSave(Resource string, CreateUserID string) (int, error) {
 	return ProcID, nil
 }
 
-//将Node转为可被数据库表记录的执行步骤。节点的PrevNodeID可能是n个，则在数据库表中需要存n行
+// 将Node转为可被数据库表记录的执行步骤。节点的PrevNodeID可能是n个，则在数据库表中需要存n行
 func nodes2Execution(ProcID int, ProcVersion int, nodes []Node) []database.ProcExecution {
 	var executions []database.ProcExecution
 	for _, n := range nodes {
@@ -148,9 +148,9 @@ func nodes2Execution(ProcID int, ProcVersion int, nodes []Node) []database.ProcE
 	return executions
 }
 
-//获取流程ID、Version by 流程名、来源
-//设置传入参数db，是因为此函数可能在事务中执行。当在事务中执行时，需要传入对应的*gorm.DB
-//若db传参为nil，则默认使用当前默认的*gorm.DB
+// 获取流程ID、Version by 流程名、来源
+// 设置传入参数db，是因为此函数可能在事务中执行。当在事务中执行时，需要传入对应的*gorm.DB
+// 若db传参为nil，则默认使用当前默认的*gorm.DB
 func GetProcessIDByProcessName(db *gorm.DB, ProcessName string, Source string) (int, int, error) {
 	type Result struct {
 		ID      int
@@ -173,10 +173,10 @@ func GetProcessIDByProcessName(db *gorm.DB, ProcessName string, Source string) (
 	return result.ID, result.Version, nil
 }
 
-//获取流程ID by 流程实例ID
+// 获取流程ID by 流程实例ID
 func GetProcessIDByInstanceID(ProcessInstanceID int) (int, error) {
 	var ID int
-	_, err := ExecSQL("SELECT proc_id FROM `proc_inst` WHERE id=?", &ID, ProcessInstanceID)
+	_, err := ExecSQL("SELECT proc_id FROM proc_inst WHERE id=?", &ID, ProcessInstanceID)
 	if err != nil {
 		return 0, err
 	}
@@ -184,7 +184,7 @@ func GetProcessIDByInstanceID(ProcessInstanceID int) (int, error) {
 	return ID, nil
 }
 
-//获取流程名称 by 流程实例ID
+// 获取流程名称 by 流程实例ID
 func GetProcessNameByInstanceID(ProcessInstanceID int) (string, error) {
 	sql := "SELECT b.name FROM proc_inst a JOIN proc_def b ON a.proc_id=b.id WHERE a.id=?"
 	type result struct {
@@ -199,7 +199,7 @@ func GetProcessNameByInstanceID(ProcessInstanceID int) (string, error) {
 	return r.Name, nil
 }
 
-//获取流程定义 by 流程ID
+// 获取流程定义 by 流程ID
 func GetProcessDefine(ProcessID int) (Process, error) {
 	type result struct {
 		Resource string
@@ -213,7 +213,7 @@ func GetProcessDefine(ProcessID int) (Process, error) {
 	return ProcessParse(r.Resource)
 }
 
-//获得某个source下所有流程信息
+// 获得某个source下所有流程信息
 func GetProcessList(Source string) ([]database.ProcDef, error) {
 	var ProcessDefine []database.ProcDef
 	_, err := ExecSQL("select * from proc_def where source=?", &ProcessDefine, Source)

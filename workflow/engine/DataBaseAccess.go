@@ -1,7 +1,8 @@
 package engine
 
 import (
-	"gorm.io/driver/mysql"
+	"gorm.io/driver/postgres"
+	_ "gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"gorm.io/gorm/schema"
@@ -14,7 +15,7 @@ import (
 
 var DB *gorm.DB
 
-func DBConnect() error{
+func DBConnect() error {
 	//有关gorm.Config，可查看文档 https://gorm.cn/zh_CN/docs/gorm_config.html
 	dsn := DBConnConfigurator.DBConnectString
 	//gorm的默认日志是只打印错误和慢SQL,这里可以自定义日志级别
@@ -28,20 +29,23 @@ func DBConnect() error{
 		},
 	)
 
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
+	db, err := gorm.Open(postgres.New(postgres.Config{
+		DSN:                  dsn,
+		PreferSimpleProtocol: true,
+	}), &gorm.Config{
 		NamingStrategy: schema.NamingStrategy{
 			TablePrefix:   "",   //表前缀.如前缀为t_，则`User` 的表名应该是 `t_users`
 			SingularTable: true, //使用单数表名，启用该选项，此时，`User` 的表名应该是 `user`
 		},
 		Logger: myLogger,
 	})
-	if err!=nil{
+	if err != nil {
 		return err
 	}
 
 	//将局部变量db赋值给pkg变量DB
 	//why?因为假设这么写 DB,err:= gorm.Open(),此时的DB只是一个新生成的局部变量，而非给全局变量DB赋值
-	DB=db
+	DB = db
 
 	sqlDB, err := DB.DB()
 	if err != nil {

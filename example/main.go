@@ -7,17 +7,19 @@ import (
 	. "github.com/Bunny3th/easy-workflow/workflow/engine"
 	. "github.com/Bunny3th/easy-workflow/workflow/web_api"
 	"github.com/gin-gonic/gin"
+	_ "gorm.io/driver/postgres"
+	_ "gorm.io/gorm"
 	"time"
 )
 
 func DBConnConfig() {
-	DBConnConfigurator.DBConnectString = "goeasy:sNd%sLDjd*12@tcp(172.16.18.18:3306)/easy_workflow?charset=utf8mb4&parseTime=True&loc=Local"
+	DBConnConfigurator.DBConnectString = "host=10.38.245.15 user=postgres password=428yGi3l dbname=jmx-iwater-db search_path=workflow port=5432 sslmode=disable TimeZone=Asia/Shanghai"
 	DBConnConfigurator.LogLevel = 4 //日志级别(默认3) 1:Silent 2:Error 3:Warn 4:Info
 }
 
 func main() {
 	//----------------------------开启流程引擎----------------------------
-	StartWorkFlow(DBConnConfig,false,&MyEvent{})
+	StartWorkFlow(DBConnConfig, false, &MyEvent{})
 
 	//----------------------------生成一个示例流程----------------------------
 	CreateExampleProcess()
@@ -26,7 +28,6 @@ func main() {
 	start, _ := time.ParseInLocation("2006-01-02 15:04:05", "2023-10-27 00:00:00", time.Local)
 	end, _ := time.ParseInLocation("2006-01-02 15:04:05", "2199-10-27 00:00:00", time.Local)
 	go ScheduleTask("自动完成任务", start, end, 10, schedule.AutoFinishTask)
-
 
 	//----------------------------开启web api----------------------------
 	//这里需要注意：如果你的业务系统也同时使用了swagger
