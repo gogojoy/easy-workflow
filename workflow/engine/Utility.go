@@ -9,14 +9,14 @@ import (
 	"strings"
 )
 
-//将json字符串转为struct
+// 将json字符串转为struct
 func Json2Struct(j string, s any) error {
 	return json.Unmarshal([]byte(j), s)
 }
 
-//json.Marshal()函数默认用HTMLEscape进行编码，它将替换“＜”、“＞”、“&”、U+2028和U+2029，
-//并将其转义为“\u003c”、“\u003e”、“\u0026”、“\ u2028”和“\u2029”
-//所以在这里做处理，判断是否开启转义
+// json.Marshal()函数默认用HTMLEscape进行编码，它将替换“＜”、“＞”、“&”、U+2028和U+2029，
+// 并将其转义为“\u003c”、“\u003e”、“\u0026”、“\ u2028”和“\u2029”
+// 所以在这里做处理，判断是否开启转义
 func JSONMarshal(t interface{}, escapeHtml bool) ([]byte, error) {
 	buffer := &bytes.Buffer{}
 	encoder := json.NewEncoder(buffer)
@@ -56,7 +56,7 @@ func TypeIsError(Type reflect.Type) bool {
 	return false
 }
 
-//这是一个偷懒取巧的办法:利用数据库计算网关中的条件表达式
+// 这是一个偷懒取巧的办法:利用数据库计算网关中的条件表达式
 func ExpressionEvaluator(expression string) (bool, error) {
 	//首先通过正则表达式判断是否有SQL注入风险
 	pattern := regexp.MustCompile("delete|truncate|insert|drop|create|select|update|set|from|grant|call|execute")
@@ -74,7 +74,7 @@ func ExpressionEvaluator(expression string) (bool, error) {
 	return ok, nil
 }
 
-//利用Map，对数组/切片数据做去重处理
+// 利用Map，对数组/切片数据做去重处理
 func MakeUnique(List ...[]string) []string {
 	set := make(map[string]string)
 	var unique []string
@@ -92,10 +92,12 @@ func MakeUnique(List ...[]string) []string {
 	return unique
 }
 
-//从切片中删除对应Index的项
-func RemoveFromSlice[T any](Slice []T, RemoveItemIndex int) []T{
-	NewSlice := append(Slice[:RemoveItemIndex], Slice[RemoveItemIndex+1:]...)
-	return NewSlice
+// 从切片中删除对应Index的项
+func RemoveFromSlice[T any](Slice []T, RemoveItemIndex int) []T {
+	if len(Slice) > RemoveItemIndex+1 {
+		NewSlice := append(Slice[:RemoveItemIndex], Slice[RemoveItemIndex+1:]...)
+		return NewSlice
+	} else {
+		return Slice[:RemoveItemIndex]
+	}
 }
-
-

@@ -2,6 +2,7 @@ package service
 
 import (
 	. "github.com/Bunny3th/easy-workflow/workflow/engine"
+	"github.com/Bunny3th/easy-workflow/workflow/web_api/data"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
@@ -47,9 +48,16 @@ func ProcDef_Save(c *gin.Context) {
 	CreateUserID := c.PostForm("CreateUserID")
 
 	if ProcID, err := ProcessSave(Resource, CreateUserID); err == nil {
-		c.JSON(http.StatusOK, ProcID)
+		c.JSON(http.StatusOK, data.CommonResponse{
+			Code:    strconv.Itoa(http.StatusOK),
+			Message: "ok",
+			Data:    gin.H{"procID": ProcID},
+		})
 	} else {
-		c.JSON(400, err.Error())
+		c.JSON(400, data.CommonResponse{
+			Code:    strconv.Itoa(400),
+			Message: err.Error(),
+		})
 	}
 }
 
@@ -64,9 +72,16 @@ func ProcDef_Save(c *gin.Context) {
 func ProcDef_ListBySource(c *gin.Context) {
 	source := c.Query("source")
 	if procDef, err := GetProcessList(source); err == nil {
-		c.JSON(200, procDef)
+		c.JSON(http.StatusOK, data.CommonResponse{
+			Code:    strconv.Itoa(http.StatusOK),
+			Message: "ok",
+			Data:    gin.H{"procDef": procDef},
+		})
 	} else {
-		c.JSON(400, err.Error())
+		c.JSON(400, data.CommonResponse{
+			Code:    strconv.Itoa(400),
+			Message: err.Error(),
+		})
 	}
 }
 
@@ -81,14 +96,24 @@ func ProcDef_ListBySource(c *gin.Context) {
 func ProcDef_GetProcDefByID(c *gin.Context) {
 	id, err := strconv.Atoi(c.Query("id"))
 	if err != nil {
-		c.JSON(400, err.Error())
+		c.JSON(400, data.CommonResponse{
+			Code:    strconv.Itoa(400),
+			Message: err.Error(),
+		})
 		return
 	}
 
 	if nodes, err := GetProcessDefine(id); err == nil {
-		c.JSON(200, nodes)
+		c.JSON(http.StatusOK, data.CommonResponse{
+			Code:    strconv.Itoa(http.StatusOK),
+			Message: "ok",
+			Data:    nodes,
+		})
 	} else {
-		c.JSON(400, err.Error())
+		c.JSON(400, data.CommonResponse{
+			Code:    strconv.Itoa(400),
+			Message: err.Error(),
+		})
 	}
 }
 
@@ -106,7 +131,10 @@ func ProcDef_GetProcDefByID(c *gin.Context) {
 func ProcInst_Start(c *gin.Context) {
 	ProcessID, err := strconv.Atoi(c.PostForm("ProcessID"))
 	if err != nil {
-		c.JSON(400, err.Error())
+		c.JSON(400, data.CommonResponse{
+			Code:    strconv.Itoa(400),
+			Message: err.Error(),
+		})
 		return
 	}
 	BusinessID := c.PostForm("BusinessID")
@@ -114,9 +142,16 @@ func ProcInst_Start(c *gin.Context) {
 	VariablesJson := c.PostForm("VariablesJson")
 
 	if id, err := InstanceStart(ProcessID, BusinessID, Comment, VariablesJson); err == nil {
-		c.JSON(200, id)
+		c.JSON(http.StatusOK, data.CommonResponse{
+			Code:    strconv.Itoa(http.StatusOK),
+			Message: "ok",
+			Data:    gin.H{"instId": id},
+		})
 	} else {
-		c.JSON(400, err.Error())
+		c.JSON(400, data.CommonResponse{
+			Code:    strconv.Itoa(400),
+			Message: err.Error(),
+		})
 	}
 }
 
@@ -133,7 +168,10 @@ func ProcInst_Start(c *gin.Context) {
 func ProcInst_Revoke(c *gin.Context) {
 	InstanceID, err := strconv.Atoi(c.PostForm("InstanceID"))
 	if err != nil {
-		c.JSON(400, err.Error())
+		c.JSON(400, data.CommonResponse{
+			Code:    strconv.Itoa(400),
+			Message: err.Error(),
+		})
 		return
 	}
 
@@ -141,14 +179,23 @@ func ProcInst_Revoke(c *gin.Context) {
 
 	Force, err := strconv.ParseBool(c.PostForm("Force"))
 	if err != nil {
-		c.JSON(400, err.Error())
+		c.JSON(400, data.CommonResponse{
+			Code:    strconv.Itoa(400),
+			Message: err.Error(),
+		})
 		return
 	}
 
 	if err := InstanceRevoke(InstanceID, Force, RevokeUserID); err == nil {
-		c.JSON(200, "ok")
+		c.JSON(http.StatusOK, data.CommonResponse{
+			Code:    strconv.Itoa(http.StatusOK),
+			Message: "ok",
+		})
 	} else {
-		c.JSON(400, err.Error())
+		c.JSON(400, data.CommonResponse{
+			Code:    strconv.Itoa(400),
+			Message: err.Error(),
+		})
 	}
 }
 
@@ -163,13 +210,23 @@ func ProcInst_Revoke(c *gin.Context) {
 func ProcInst_TaskHistory(c *gin.Context) {
 	InstanceID, err := strconv.Atoi(c.Query("instid"))
 	if err != nil {
-		c.JSON(400, err.Error())
+		c.JSON(400, data.CommonResponse{
+			Code:    strconv.Itoa(400),
+			Message: err.Error(),
+		})
 		return
 	}
 	if tasklist, err := GetInstanceTaskHistory(InstanceID); err == nil {
-		c.JSON(200, tasklist)
+		c.JSON(http.StatusOK, data.CommonResponse{
+			Code:    strconv.Itoa(http.StatusOK),
+			Message: "ok",
+			Data:    tasklist,
+		})
 	} else {
-		c.JSON(400, err.Error())
+		c.JSON(400, data.CommonResponse{
+			Code:    strconv.Itoa(400),
+			Message: err.Error(),
+		})
 	}
 }
 
@@ -189,19 +246,32 @@ func ProcInst_StartByUser(c *gin.Context) {
 	ProcessName := c.Query("procname")
 	StartIndex, err := strconv.Atoi(c.Query("idx"))
 	if err != nil {
-		c.JSON(400, err.Error())
+		c.JSON(400, data.CommonResponse{
+			Code:    strconv.Itoa(400),
+			Message: err.Error(),
+		})
 		return
 	}
 	MaxRow, err := strconv.Atoi(c.Query("rows"))
 	if err != nil {
-		c.JSON(400, err.Error())
+		c.JSON(400, data.CommonResponse{
+			Code:    strconv.Itoa(400),
+			Message: err.Error(),
+		})
 		return
 	}
 
 	if insts, err := GetInstanceStartByUser(UserID, ProcessName, StartIndex, MaxRow); err == nil {
-		c.JSON(200, insts)
+		c.JSON(http.StatusOK, data.CommonResponse{
+			Code:    strconv.Itoa(http.StatusOK),
+			Message: "ok",
+			Data:    insts,
+		})
 	} else {
-		c.JSON(400, err.Error())
+		c.JSON(400, data.CommonResponse{
+			Code:    strconv.Itoa(400),
+			Message: err.Error(),
+		})
 	}
 }
 
@@ -218,16 +288,25 @@ func ProcInst_StartByUser(c *gin.Context) {
 func Task_Pass(c *gin.Context) {
 	TaskID, err := strconv.Atoi(c.PostForm("TaskID"))
 	if err != nil {
-		c.JSON(400, err.Error())
+		c.JSON(400, data.CommonResponse{
+			Code:    strconv.Itoa(400),
+			Message: err.Error(),
+		})
 		return
 	}
 	Comment := c.PostForm("Comment")
 	VariableJson := c.PostForm("VariableJson")
 
 	if err := TaskPass(TaskID, Comment, VariableJson, false); err == nil {
-		c.JSON(200, "ok")
+		c.JSON(http.StatusOK, data.CommonResponse{
+			Code:    strconv.Itoa(http.StatusOK),
+			Message: "ok",
+		})
 	} else {
-		c.JSON(400, err.Error())
+		c.JSON(400, data.CommonResponse{
+			Code:    strconv.Itoa(400),
+			Message: err.Error(),
+		})
 	}
 }
 
@@ -244,16 +323,25 @@ func Task_Pass(c *gin.Context) {
 func Task_Pass_DirectlyToWhoRejectedMe(c *gin.Context) {
 	TaskID, err := strconv.Atoi(c.PostForm("TaskID"))
 	if err != nil {
-		c.JSON(400, err.Error())
+		c.JSON(400, data.CommonResponse{
+			Code:    strconv.Itoa(400),
+			Message: err.Error(),
+		})
 		return
 	}
 	Comment := c.PostForm("Comment")
 	VariableJson := c.PostForm("VariableJson")
 
 	if err := TaskPass(TaskID, Comment, VariableJson, true); err == nil {
-		c.JSON(200, "ok")
+		c.JSON(http.StatusOK, data.CommonResponse{
+			Code:    strconv.Itoa(http.StatusOK),
+			Message: "ok",
+		})
 	} else {
-		c.JSON(400, err.Error())
+		c.JSON(400, data.CommonResponse{
+			Code:    strconv.Itoa(400),
+			Message: err.Error(),
+		})
 	}
 }
 
@@ -270,16 +358,25 @@ func Task_Pass_DirectlyToWhoRejectedMe(c *gin.Context) {
 func Task_Reject(c *gin.Context) {
 	TaskID, err := strconv.Atoi(c.PostForm("TaskID"))
 	if err != nil {
-		c.JSON(400, err.Error())
+		c.JSON(400, data.CommonResponse{
+			Code:    strconv.Itoa(400),
+			Message: err.Error(),
+		})
 		return
 	}
 	Comment := c.PostForm("Comment")
 	VariableJson := c.PostForm("VariableJson")
 
 	if err := TaskReject(TaskID, Comment, VariableJson); err == nil {
-		c.JSON(200, "ok")
+		c.JSON(http.StatusOK, data.CommonResponse{
+			Code:    strconv.Itoa(http.StatusOK),
+			Message: "ok",
+		})
 	} else {
-		c.JSON(400, err.Error())
+		c.JSON(400, data.CommonResponse{
+			Code:    strconv.Itoa(400),
+			Message: err.Error(),
+		})
 	}
 }
 
@@ -295,15 +392,24 @@ func Task_Reject(c *gin.Context) {
 func Task_Transfer(c *gin.Context) {
 	TaskID, err := strconv.Atoi(c.PostForm("TaskID"))
 	if err != nil {
-		c.JSON(400, err.Error())
+		c.JSON(400, data.CommonResponse{
+			Code:    strconv.Itoa(400),
+			Message: err.Error(),
+		})
 		return
 	}
 	Users := strings.Split(c.PostForm("Users"), ",")
 
 	if err := TaskTransfer(TaskID, Users); err == nil {
-		c.JSON(200, "ok")
+		c.JSON(http.StatusOK, data.CommonResponse{
+			Code:    strconv.Itoa(http.StatusOK),
+			Message: "ok",
+		})
 	} else {
-		c.JSON(400, err.Error())
+		c.JSON(400, data.CommonResponse{
+			Code:    strconv.Itoa(400),
+			Message: err.Error(),
+		})
 	}
 }
 
@@ -324,24 +430,40 @@ func Task_ToDoList(c *gin.Context) {
 	ProcessName := c.Query("procname")
 	SortByAsc, err := strconv.ParseBool(c.Query("asc"))
 	if err != nil {
-		c.JSON(400, err.Error())
+		c.JSON(400, data.CommonResponse{
+			Code:    strconv.Itoa(400),
+			Message: err.Error(),
+		})
 		return
 	}
 	StartIndex, err := strconv.Atoi(c.Query("idx"))
 	if err != nil {
-		c.JSON(400, err.Error())
+		c.JSON(400, data.CommonResponse{
+			Code:    strconv.Itoa(400),
+			Message: err.Error(),
+		})
 		return
 	}
 	MaxRow, err := strconv.Atoi(c.Query("rows"))
 	if err != nil {
-		c.JSON(400, err.Error())
+		c.JSON(400, data.CommonResponse{
+			Code:    strconv.Itoa(400),
+			Message: err.Error(),
+		})
 		return
 	}
 
 	if tasks, err := GetTaskToDoList(UserID, ProcessName, SortByAsc, StartIndex, MaxRow); err == nil {
-		c.JSON(200, tasks)
+		c.JSON(http.StatusOK, data.CommonResponse{
+			Code:    strconv.Itoa(http.StatusOK),
+			Message: "ok",
+			Data:    tasks,
+		})
 	} else {
-		c.JSON(400, err.Error())
+		c.JSON(400, data.CommonResponse{
+			Code:    strconv.Itoa(400),
+			Message: err.Error(),
+		})
 	}
 }
 
@@ -363,28 +485,47 @@ func Task_FinishedList(c *gin.Context) {
 	ProcessName := c.Query("procname")
 	IgnoreStartByMe, err := strconv.ParseBool(c.Query("ignorestartbyme"))
 	if err != nil {
-		c.JSON(400, err.Error())
+		c.JSON(400, data.CommonResponse{
+			Code:    strconv.Itoa(400),
+			Message: err.Error(),
+		})
 		return
 	}
 	SortByAsc, err := strconv.ParseBool(c.Query("asc"))
 	if err != nil {
-		c.JSON(400, err.Error())
+		c.JSON(400, data.CommonResponse{
+			Code:    strconv.Itoa(400),
+			Message: err.Error(),
+		})
 		return
 	}
 	StartIndex, err := strconv.Atoi(c.Query("idx"))
 	if err != nil {
-		c.JSON(400, err.Error())
+		c.JSON(400, data.CommonResponse{
+			Code:    strconv.Itoa(400),
+			Message: err.Error(),
+		})
 		return
 	}
 	MaxRow, err := strconv.Atoi(c.Query("rows"))
 	if err != nil {
-		c.JSON(400, err.Error())
+		c.JSON(400, data.CommonResponse{
+			Code:    strconv.Itoa(400),
+			Message: err.Error(),
+		})
 		return
 	}
-	if tasks, err := GetTaskFinishedList(UserID, ProcessName, IgnoreStartByMe,SortByAsc, StartIndex, MaxRow); err == nil {
-		c.JSON(200, tasks)
+	if tasks, err := GetTaskFinishedList(UserID, ProcessName, IgnoreStartByMe, SortByAsc, StartIndex, MaxRow); err == nil {
+		c.JSON(http.StatusOK, data.CommonResponse{
+			Code:    strconv.Itoa(http.StatusOK),
+			Message: "ok",
+			Data:    tasks,
+		})
 	} else {
-		c.JSON(400, err.Error())
+		c.JSON(400, data.CommonResponse{
+			Code:    strconv.Itoa(400),
+			Message: err.Error(),
+		})
 	}
 }
 
@@ -399,14 +540,24 @@ func Task_FinishedList(c *gin.Context) {
 func Task_UpstreamNodeList(c *gin.Context) {
 	TaskID, err := strconv.Atoi(c.Query("taskid"))
 	if err != nil {
-		c.JSON(400, err.Error())
+		c.JSON(400, data.CommonResponse{
+			Code:    strconv.Itoa(400),
+			Message: err.Error(),
+		})
 		return
 	}
 
 	if nodes, err := TaskUpstreamNodeList(TaskID); err == nil {
-		c.JSON(200, nodes)
+		c.JSON(http.StatusOK, data.CommonResponse{
+			Code:    strconv.Itoa(http.StatusOK),
+			Message: "ok",
+			Data:    nodes,
+		})
 	} else {
-		c.JSON(400, err.Error())
+		c.JSON(400, data.CommonResponse{
+			Code:    strconv.Itoa(400),
+			Message: err.Error(),
+		})
 	}
 }
 
@@ -424,7 +575,10 @@ func Task_UpstreamNodeList(c *gin.Context) {
 func Task_FreeRejectToUpstreamNode(c *gin.Context) {
 	TaskID, err := strconv.Atoi(c.PostForm("TaskID"))
 	if err != nil {
-		c.JSON(400, err.Error())
+		c.JSON(400, data.CommonResponse{
+			Code:    strconv.Itoa(400),
+			Message: err.Error(),
+		})
 		return
 	}
 
@@ -433,9 +587,15 @@ func Task_FreeRejectToUpstreamNode(c *gin.Context) {
 	RejectToNodeID := c.PostForm("RejectToNodeID")
 
 	if err := TaskFreeRejectToUpstreamNode(TaskID, RejectToNodeID, Comment, VariableJson); err == nil {
-		c.JSON(200, "ok")
+		c.JSON(http.StatusOK, data.CommonResponse{
+			Code:    strconv.Itoa(http.StatusOK),
+			Message: "ok",
+		})
 	} else {
-		c.JSON(400, err.Error())
+		c.JSON(400, data.CommonResponse{
+			Code:    strconv.Itoa(400),
+			Message: err.Error(),
+		})
 	}
 }
 
@@ -450,13 +610,23 @@ func Task_FreeRejectToUpstreamNode(c *gin.Context) {
 func Task_WhatCanIDo(c *gin.Context) {
 	TaskID, err := strconv.Atoi(c.Query("taskid"))
 	if err != nil {
-		c.JSON(400, err.Error())
+		c.JSON(400, data.CommonResponse{
+			Code:    strconv.Itoa(400),
+			Message: err.Error(),
+		})
 		return
 	}
 	if action, err := WhatCanIDo(TaskID); err == nil {
-		c.JSON(200, action)
+		c.JSON(http.StatusOK, data.CommonResponse{
+			Code:    strconv.Itoa(http.StatusOK),
+			Message: "ok",
+			Data:    action,
+		})
 	} else {
-		c.JSON(400, err.Error())
+		c.JSON(400, data.CommonResponse{
+			Code:    strconv.Itoa(400),
+			Message: err.Error(),
+		})
 	}
 }
 
@@ -471,12 +641,22 @@ func Task_WhatCanIDo(c *gin.Context) {
 func Task_Info(c *gin.Context) {
 	TaskID, err := strconv.Atoi(c.Query("taskid"))
 	if err != nil {
-		c.JSON(400, err.Error())
+		c.JSON(400, data.CommonResponse{
+			Code:    strconv.Itoa(400),
+			Message: err.Error(),
+		})
 		return
 	}
 	if taskInfo, err := GetTaskInfo(TaskID); err == nil {
-		c.JSON(200, taskInfo)
+		c.JSON(http.StatusOK, data.CommonResponse{
+			Code:    strconv.Itoa(http.StatusOK),
+			Message: "ok",
+			Data:    taskInfo,
+		})
 	} else {
-		c.JSON(400, err.Error())
+		c.JSON(400, data.CommonResponse{
+			Code:    strconv.Itoa(400),
+			Message: err.Error(),
+		})
 	}
 }
